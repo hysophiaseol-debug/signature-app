@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>서명 입력</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        #signature { border: 1px solid #000; }
+    </style>
+</head>
+<body>
+    <h2>서명 입력</h2>
+
+    <label>제출 시간:</label>
+    <input id="time" type="text"><br><br>
+
+    <label>이름:</label>
+    <input id="name" type="text"><br><br>
+
+    <label>소속:</label>
+    <input id="org" type="text"><br><br>
+
+    <h3>서명</h3>
+    <canvas id="signature" width="400" height="200"></canvas><br>
+    <button onclick="clearCanvas()">지우기</button>
+    <button onclick="submitForm()">제출</button>
+
+<script>
+let canvas = document.getElementById("signature");
+let ctx = canvas.getContext("2d");
+let drawing = false;
+
+canvas.addEventListener("mousedown", () => drawing = true);
+canvas.addEventListener("mouseup", () => drawing = false);
+canvas.addEventListener("mousemove", draw);
+
+function draw(e) {
+    if (!drawing) return;
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    const rect = canvas.getBoundingClientRect();
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+}
+
+function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function submitForm() {
+    const data = {
+        time: document.getElementById("time").value,
+        name: document.getElementById("name").value,
+        org: document.getElementById("org").value,
+        signature: canvas.toDataURL("image/png")
+    };
+
+    fetch("https://signature-app-t0w0.onrender.com", {   // ← 서버 URL
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    }).then(r => alert("제출 완료!"));
+}
+</script>
+</body>
+</html>
